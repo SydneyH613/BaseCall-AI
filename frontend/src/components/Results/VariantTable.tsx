@@ -18,7 +18,7 @@ export function VariantTable({ variants }: { variants: Variant[] }) {
   }
 
   return (
-    <div style={{ overflowX: "auto" }}>
+    <div className="scroll-x">
       <table className="table">
         <thead>
           <tr>

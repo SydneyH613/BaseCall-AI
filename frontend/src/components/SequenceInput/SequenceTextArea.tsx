@@ -44,11 +44,19 @@ export function SequenceTextArea({ label, hint, value, onChange, placeholder, ro
         outlineOffset: 4,
       }}
     >
-      <div className="row-between" style={{ marginBottom: hint ? 2 : 7, alignItems: "flex-start" }}>
-        <label className="label" style={{ margin: 0 }}>
+      <div
+        className="row-between"
+        style={{ marginBottom: hint ? 2 : 7, alignItems: "flex-start", flexWrap: "wrap", rowGap: 4 }}
+      >
+        <label className="label" style={{ margin: 0, whiteSpace: "nowrap" }}>
           {label}
         </label>
-        <button type="button" className="field-action" onClick={() => inputRef.current?.click()}>
+        <button
+          type="button"
+          className="field-action"
+          style={{ whiteSpace: "nowrap" }}
+          onClick={() => inputRef.current?.click()}
+        >
           Upload .fasta / .txt
         </button>
         <input

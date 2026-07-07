@@ -242,7 +242,7 @@ export function AnalyzePage() {
         <div className="stack-sm">
           <span className="eyebrow">Step 3 — results</span>
           <div className="card card-pad stack-md">
-            <div className="row-between">
+            <div className="row-between" style={{ flexWrap: "wrap", rowGap: 6 }}>
               <div className="stack-xs" style={{ gap: 2 }}>
                 {label ? (
                   <span style={{ fontFamily: "var(--font-display)", fontSize: 16 }}>{label}</span>
@@ -254,7 +254,10 @@ export function AnalyzePage() {
                 )}
               </div>
               {preview.goal === "mutations" && (
-                <span className="text-faint" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
+                <span
+                  className="text-faint"
+                  style={{ fontFamily: "var(--font-mono)", fontSize: 12, whiteSpace: "nowrap" }}
+                >
                   {preview.data.identity_pct}% identity · score {preview.data.score}
                 </span>
               )}

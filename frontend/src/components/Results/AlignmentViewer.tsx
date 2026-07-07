@@ -1,4 +1,14 @@
-const CHUNK_SIZE = 60;
+import { useEffect, useRef, useState } from "react";
+
+const MIN_CHUNK_SIZE = 20;
+const MAX_CHUNK_SIZE = 60;
+// Rough monospace character width at this component's font-size (12.5px)
+// plus letter-spacing, used to fit as many bases per line as the box
+// actually has room for -- so short sequences read on one line without
+// needing to scroll, and long ones wrap at a width that fits the screen.
+const CHAR_WIDTH_PX = 8.2;
+const LINE_PREFIX_WIDTH_PX = 34; // space reserved for the "ref "/"qry " label
+const BOX_PADDING_PX = 36; // left+right padding of the sequence box itself
 
 interface Props {
   alignedReference: string;
@@ -13,15 +23,39 @@ function chunk(str: string, size: number): string[] {
   return chunks;
 }
 
+function useResponsiveChunkSize() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [chunkSize, setChunkSize] = useState(MAX_CHUNK_SIZE);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const available = el.clientWidth - BOX_PADDING_PX - LINE_PREFIX_WIDTH_PX;
+      const charsThatFit = Math.floor(available / CHAR_WIDTH_PX);
+      setChunkSize(Math.max(MIN_CHUNK_SIZE, Math.min(MAX_CHUNK_SIZE, charsThatFit)));
+    };
+
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { containerRef, chunkSize };
+}
+
 export function AlignmentViewer({ alignedReference, alignedQuery }: Props) {
-  const refChunks = chunk(alignedReference, CHUNK_SIZE);
-  const qryChunks = chunk(alignedQuery, CHUNK_SIZE);
+  const { containerRef, chunkSize } = useResponsiveChunkSize();
+  const refChunks = chunk(alignedReference, chunkSize);
+  const qryChunks = chunk(alignedQuery, chunkSize);
 
   return (
     <div
-      className="sequence-block"
+      ref={containerRef}
+      className="sequence-block scroll-x"
       style={{
-        overflowX: "auto",
         background: "var(--bg-sunken)",
         border: "1px solid var(--border)",
         borderRadius: "var(--radius)",
@@ -30,7 +64,7 @@ export function AlignmentViewer({ alignedReference, alignedQuery }: Props) {
     >
       {refChunks.map((refLine, lineIdx) => {
         const qryLine = qryChunks[lineIdx] ?? "";
-        const offset = lineIdx * CHUNK_SIZE;
+        const offset = lineIdx * chunkSize;
         return (
           <div key={lineIdx} style={{ marginBottom: 14 }}>
             <div className="text-faint" style={{ fontSize: 10.5, marginBottom: 2 }}>
