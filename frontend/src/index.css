@@ -533,15 +533,12 @@ select {
 .brand-mark {
   width: 26px;
   height: 26px;
-  border: 1.5px solid var(--accent);
   border-radius: var(--radius-sm);
+  background: var(--accent);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
+  flex-shrink: 0;
 }
 
 .nav-link {

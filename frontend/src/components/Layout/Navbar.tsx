@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { loggedOut } from "../../store/slices/authSlice";
+import { BrandMark } from "./BrandMark";
 
 export function Navbar() {
   const user = useAppSelector((state) => state.auth.user);
@@ -23,9 +24,7 @@ export function Navbar() {
     <header style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)" }}>
       <div className="container row-between" style={{ height: 62 }}>
         <Link to="/" className="brand" onClick={closeMenu}>
-          <span className="brand-mark" aria-hidden>
-            BC
-          </span>
+          <BrandMark />
           BaseCall AI
         </Link>
 
