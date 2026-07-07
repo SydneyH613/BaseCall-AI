@@ -41,9 +41,9 @@ purposes only and is not a diagnostic device. Keep the response to 3-6 short par
 or a tight bulleted list."""
 
 FALLBACK_MESSAGE = (
-    "AI explanation is temporarily unavailable (the AI provider didn't respond "
-    "successfully). The computed results above are unaffected and have been saved — "
-    "you can try again later."
+    "AI explanation is temporarily unavailable because the AI provider did not respond "
+    "successfully. The computed results above are correct and have already been saved — "
+    "please try again later for a plain-language explanation."
 )
 
 

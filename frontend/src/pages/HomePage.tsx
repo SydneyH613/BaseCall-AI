@@ -30,9 +30,9 @@ export function HomePage() {
         <span className="eyebrow">Sequence analysis · powered by real algorithms</span>
         <h1 style={{ fontSize: 40, lineHeight: 1.2 }}>From raw sequence to real understanding.</h1>
         <p className="text-muted" style={{ fontSize: 16, lineHeight: 1.6, margin: 0 }}>
-          BaseCall AI runs the actual bioinformatics — sequence alignment, codon translation,
-          mutation classification — as deterministic computation. AI is used for exactly one
-          thing afterward: explaining what the results mean.
+          BaseCall AI runs the actual bioinformatics algorithms — sequence alignment, codon
+          translation, mutation classification — as deterministic computation. AI is used for
+          exactly one thing afterward: explaining what the results mean.
         </p>
         <div>
           <Link to="/analyze" className="btn">

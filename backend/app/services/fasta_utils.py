@@ -114,13 +114,13 @@ def primer_report(seq: str) -> dict:
     tm = melting_temp_wallace(seq)
     warnings: list[str] = []
     if stats["length"] < 18 or stats["length"] > 24:
-        warnings.append("Primer length outside the typical 18-24bp range.")
+        warnings.append("Primer length is outside the typical 18–24 bp range.")
     if not (40 <= stats["gc_content_pct"] <= 60):
-        warnings.append("GC content outside the ideal 40-60% range.")
+        warnings.append("GC content is outside the ideal 40–60% range.")
     if tm < 50 or tm > 65:
-        warnings.append("Melting temperature outside the typical 50-65C range.")
+        warnings.append("Melting temperature is outside the typical 50–65°C range.")
     if seq.upper().endswith(("A", "T")):
-        warnings.append("3' end is A/T — may reduce primer binding stability (no GC clamp).")
+        warnings.append("The 3′ end is A/T, which may reduce primer binding stability (no GC clamp).")
     return {
         "sequence": seq.upper(),
         "length": stats["length"],

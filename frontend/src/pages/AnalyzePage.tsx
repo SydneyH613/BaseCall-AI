@@ -248,7 +248,8 @@ export function AnalyzePage() {
                   <span style={{ fontFamily: "var(--font-display)", fontSize: 16 }}>{label}</span>
                 ) : (
                   <span className="text-faint" style={{ fontSize: 12.5 }}>
-                    No gene label detected — paste a FASTA {"'>"}header to auto-label this analysis.
+                    No gene label detected — paste a FASTA sequence with a "&gt;header" line to
+                    label this analysis automatically.
                   </span>
                 )}
               </div>

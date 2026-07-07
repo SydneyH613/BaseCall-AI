@@ -51,7 +51,7 @@ const GLOSSARY: { term: string; detail: string }[] = [
   },
   {
     term: "GC content",
-    detail: "The percentage of a sequence that is guanine or cytosine, which pair more strongly than A–T.",
+    detail: "The percentage of a sequence made up of guanine or cytosine — G-C base pairs bond more strongly than A-T pairs.",
   },
 ];
 
@@ -143,7 +143,7 @@ export function LearnPage() {
         </P>
         <P>
           BaseCall uses the <strong>Needleman-Wunsch algorithm</strong>, a classic dynamic
-          programming method for global alignment (i.e. aligning two sequences end-to-end, not
+          programming method for global alignment (i.e., aligning two sequences end-to-end, not
           just their best-matching sub-regions). It scores every possible alignment path through a
           matrix — rewarding matches, penalizing mismatches and gaps — and then traces back the
           highest-scoring path. The result is a mathematically optimal alignment, not just a
@@ -184,8 +184,8 @@ export function LearnPage() {
           <P>
             The <em>HBB</em> gene, on chromosome 11, encodes beta-globin — one of the two protein
             chains that make up adult hemoglobin. A single point mutation, <strong>GAG → GTG</strong>,
-            swaps the codon for glutamic acid to the codon for valine at position 6 of the mature
-            protein. One base, out of a 146-amino-acid chain. But glutamic acid is charged and
+            changes the codon for glutamic acid to the codon for valine at position 6 of the
+            mature protein. One base, out of a 146-amino-acid chain. But glutamic acid is charged and
             valine is hydrophobic, and that one substitution is enough to let hemoglobin molecules
             stick together into rigid fibers under low oxygen, forcing red blood cells into the
             characteristic sickle shape. It's a textbook <strong>missense mutation</strong> — and a

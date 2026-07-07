@@ -36,7 +36,7 @@ backend/    FastAPI (Python), SQLAlchemy + PostgreSQL, JWT auth
 - `backend/app/services/fasta_utils.py` — FASTA parsing, GC/ORF/primer stats, variant calling
 - `backend/app/services/ai_interpret.py` — Claude interpretation layer
 - `backend/app/api/routes/sequences.py` — stateless preview endpoints (no auth, no persistence)
-- `backend/app/api/routes/analyses.py` — authenticated create/list/get/delete, persists + AI explanation
+- `backend/app/api/routes/analyses.py` — authenticated create/list/get/delete; persists results and generates an AI explanation
 
 ## Local development
 

@@ -118,7 +118,7 @@ def test_melting_temp_wallace_short_primer_uses_exact_rule():
 def test_primer_report_flags_at_3prime_end():
     report = primer_report("GAAGGTGAAGGTCGGAGTCA")  # real GAPDH fwd primer, ends in A
     assert report["length"] == 20
-    assert any("3' end" in w for w in report["warnings"])
+    assert any("3′ end" in w for w in report["warnings"])
 
 
 def test_primer_report_gc_matches_manual_count():

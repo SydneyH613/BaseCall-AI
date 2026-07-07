@@ -41,7 +41,8 @@ export function HistoryPage() {
       {loading && <p className="text-muted">Loading…</p>}
       {!loading && analyses.length === 0 && (
         <p className="text-muted">
-          No saved analyses yet. <Link to="/analyze">Run one</Link> and save it to see it here.
+          No saved analyses yet. <Link to="/analyze">Run an analysis</Link> and save it to see it
+          listed here.
         </p>
       )}
 
