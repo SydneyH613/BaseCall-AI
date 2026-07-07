@@ -13,7 +13,7 @@ router = APIRouter(prefix="/api/analyses", tags=["analyses"])
 
 
 def _compute(goal: AnalysisGoal, reference: str, query: str | None) -> dict:
-    if goal in (AnalysisGoal.compare, AnalysisGoal.mutations):
+    if goal == AnalysisGoal.mutations:
         if not query:
             raise HTTPException(400, detail="query_sequence is required for this goal")
         return call_variants(reference, query)

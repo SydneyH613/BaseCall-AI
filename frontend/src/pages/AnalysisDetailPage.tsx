@@ -54,7 +54,7 @@ export function AnalysisDetailPage() {
       </div>
 
       <div className="card card-pad stack-md">
-        {(analysis.goal === "mutations" || analysis.goal === "compare") && (
+        {analysis.goal === "mutations" && (
           <>
             <span className="text-faint" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
               {(analysis.results as AlignmentResult).identity_pct}% identity · score{" "}

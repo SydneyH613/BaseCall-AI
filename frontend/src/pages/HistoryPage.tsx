@@ -5,7 +5,6 @@ import type { Analysis } from "../types";
 
 const GOAL_LABELS: Record<string, string> = {
   mutations: "Find mutations",
-  compare: "Compare sequences",
   orfs: "Find ORFs",
   primer: "Check primer",
 };

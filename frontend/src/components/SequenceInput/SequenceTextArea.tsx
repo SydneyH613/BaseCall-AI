@@ -2,13 +2,14 @@ import { useRef, useState, type DragEvent } from "react";
 
 interface Props {
   label: string;
+  hint?: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   rows?: number;
 }
 
-export function SequenceTextArea({ label, value, onChange, placeholder, rows = 6 }: Props) {
+export function SequenceTextArea({ label, hint, value, onChange, placeholder, rows = 6 }: Props) {
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -43,7 +44,7 @@ export function SequenceTextArea({ label, value, onChange, placeholder, rows = 6
         outlineOffset: 4,
       }}
     >
-      <div className="row-between" style={{ marginBottom: 7 }}>
+      <div className="row-between" style={{ marginBottom: hint ? 2 : 7, alignItems: "flex-start" }}>
         <label className="label" style={{ margin: 0 }}>
           {label}
         </label>
@@ -58,6 +59,11 @@ export function SequenceTextArea({ label, value, onChange, placeholder, rows = 6
           style={{ display: "none" }}
         />
       </div>
+      {hint && (
+        <p className="text-faint" style={{ fontSize: 12.5, margin: "0 0 7px" }}>
+          {hint}
+        </p>
+      )}
       <textarea
         className="textarea mono"
         rows={rows}

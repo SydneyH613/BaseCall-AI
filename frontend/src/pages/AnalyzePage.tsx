@@ -14,21 +14,52 @@ import type { AlignmentResult, AnalysisGoal, OrfPreviewResult, PrimerResult, Seq
 
 const DEFAULT_NAME = "Untitled analysis";
 
-const GOALS: { id: AnalysisGoal; label: string; needsQuery: boolean }[] = [
-  { id: "mutations", label: "Find mutations", needsQuery: true },
-  { id: "compare", label: "Compare sequences", needsQuery: true },
-  { id: "orfs", label: "Find ORFs", needsQuery: false },
-  { id: "primer", label: "Check primer", needsQuery: false },
+interface GoalDef {
+  id: AnalysisGoal;
+  label: string;
+  description: string;
+  needsQuery: boolean;
+  referenceLabel: string;
+  referenceHint: string;
+  queryHint?: string;
+}
+
+const GOALS: GoalDef[] = [
+  {
+    id: "mutations",
+    label: "Find mutations",
+    description:
+      "Aligns a reference and query sequence, then classifies every difference — silent, missense, nonsense, or frameshift.",
+    needsQuery: true,
+    referenceLabel: "Reference sequence",
+    referenceHint: "The known/baseline sequence",
+    queryHint: "The sequence you want to check against it",
+  },
+  {
+    id: "orfs",
+    label: "Find ORFs",
+    description: "Scans all 6 reading frames for start-to-stop open reading frames and translates each to protein.",
+    needsQuery: false,
+    referenceLabel: "Sequence",
+    referenceHint: "The sequence to scan for genes",
+  },
+  {
+    id: "primer",
+    label: "Check primer",
+    description: "Checks GC content, melting temperature, and common design issues before you order a primer.",
+    needsQuery: false,
+    referenceLabel: "Primer sequence",
+    referenceHint: "The primer to check",
+  },
 ];
 
 type PreviewResult =
   | { goal: "mutations"; data: AlignmentResult }
-  | { goal: "compare"; data: AlignmentResult }
   | { goal: "orfs"; data: OrfPreviewResult }
   | { goal: "primer"; data: PrimerResult };
 
 function detectedLabel(preview: PreviewResult): string | null {
-  if (preview.goal === "mutations" || preview.goal === "compare") {
+  if (preview.goal === "mutations") {
     const parts = [preview.data.reference_label, preview.data.query_label].filter(
       (label): label is string => Boolean(label),
     );
@@ -68,7 +99,7 @@ export function AnalyzePage() {
     setAiExplanation(null);
     setPreview(null);
     if (!reference.trim()) {
-      setError("Enter a reference sequence first.");
+      setError(activeGoal.needsQuery ? "Enter a reference sequence first." : "Enter a sequence first.");
       return;
     }
     if (activeGoal.needsQuery && !query.trim()) {
@@ -78,7 +109,7 @@ export function AnalyzePage() {
     setRunLoading(true);
     try {
       let result: PreviewResult;
-      if (goal === "mutations" || goal === "compare") {
+      if (goal === "mutations") {
         result = { goal, data: await previewCompare(reference, query) };
       } else if (goal === "orfs") {
         result = { goal: "orfs", data: await previewOrfs(reference) };
@@ -132,100 +163,117 @@ export function AnalyzePage() {
         </p>
       </div>
 
-      <div className="tabs">
-        {GOALS.map((g) => (
-          <button
-            key={g.id}
-            onClick={() => {
-              setGoal(g.id);
-              setPreview(null);
-              setAiExplanation(null);
-              setError(null);
-            }}
-            className={goal === g.id ? "tab active" : "tab"}
-          >
-            {g.label}
-          </button>
-        ))}
+      <div className="stack-sm">
+        <span className="eyebrow">Step 1 — choose an analysis</span>
+        <div className="tabs">
+          {GOALS.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => {
+                setGoal(g.id);
+                setPreview(null);
+                setAiExplanation(null);
+                setError(null);
+              }}
+              className={goal === g.id ? "tab active" : "tab"}
+            >
+              {g.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-muted" style={{ margin: 0, fontSize: 14 }}>{activeGoal.description}</p>
       </div>
 
-      <div className="card card-pad stack-md">
-        <div>
-          <label className="label">Analysis name</label>
-          <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
-        </div>
+      <div className="stack-sm">
+        <span className="eyebrow">
+          Step 2 — enter your {activeGoal.needsQuery ? "sequences" : "sequence"}
+        </span>
+        <div className="card card-pad stack-md">
+          <SequenceTextArea
+            label={activeGoal.referenceLabel}
+            hint={activeGoal.referenceHint}
+            value={reference}
+            onChange={setReference}
+            placeholder="Paste a raw sequence, or a FASTA record with a >header (e.g. '>HBB exon 1') to auto-label this analysis by gene"
+          />
+          {stats && <StatsStrip stats={stats} />}
 
-        <SequenceTextArea
-          label={activeGoal.needsQuery ? "Reference sequence" : "Sequence"}
-          value={reference}
-          onChange={setReference}
-          placeholder="Paste a raw sequence, or a FASTA record with a >header (e.g. '>HBB exon 1') to auto-label this analysis by gene"
-        />
-        {stats && <StatsStrip stats={stats} />}
+          {activeGoal.needsQuery && (
+            <SequenceTextArea
+              label="Query sequence"
+              hint={activeGoal.queryHint}
+              value={query}
+              onChange={setQuery}
+            />
+          )}
 
-        {activeGoal.needsQuery && (
-          <SequenceTextArea label="Query sequence" value={query} onChange={setQuery} />
-        )}
+          {error && <p style={{ color: "var(--danger)", margin: 0, fontSize: 14 }}>{error}</p>}
 
-        {error && (
-          <p style={{ color: "var(--danger)", margin: 0, fontSize: 14 }}>{error}</p>
-        )}
-
-        <div>
-          <button className="btn" onClick={handleRun} disabled={runLoading}>
-            {runLoading ? "Running…" : "Run analysis"}
-          </button>
+          <div>
+            <button className="btn" onClick={handleRun} disabled={runLoading}>
+              {runLoading ? "Running…" : "Run analysis"}
+            </button>
+          </div>
         </div>
       </div>
 
       {preview && (
-        <div className="card card-pad stack-md">
-          <div className="row-between">
-            <div className="stack-xs" style={{ gap: 2 }}>
-              <span className="eyebrow">Results</span>
-              {label && (
-                <span style={{ fontFamily: "var(--font-display)", fontSize: 15 }}>{label}</span>
-              )}
-              {!label && (
-                <span className="text-faint" style={{ fontSize: 12.5 }}>
-                  No gene detected — paste a FASTA {"'>"}header to label this analysis automatically.
+        <div className="stack-sm">
+          <span className="eyebrow">Step 3 — results</span>
+          <div className="card card-pad stack-md">
+            <div className="row-between">
+              <div className="stack-xs" style={{ gap: 2 }}>
+                {label ? (
+                  <span style={{ fontFamily: "var(--font-display)", fontSize: 16 }}>{label}</span>
+                ) : (
+                  <span className="text-faint" style={{ fontSize: 12.5 }}>
+                    No gene label detected — paste a FASTA {"'>"}header to auto-label this analysis.
+                  </span>
+                )}
+              </div>
+              {preview.goal === "mutations" && (
+                <span className="text-faint" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
+                  {preview.data.identity_pct}% identity · score {preview.data.score}
                 </span>
               )}
             </div>
-            {(preview.goal === "mutations" || preview.goal === "compare") && (
-              <span className="text-faint" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
-                {preview.data.identity_pct}% identity · score {preview.data.score}
-              </span>
+
+            {preview.goal === "mutations" && (
+              <>
+                <AlignmentViewer
+                  alignedReference={preview.data.aligned_reference}
+                  alignedQuery={preview.data.aligned_query}
+                />
+                <VariantTable variants={preview.data.variants} />
+              </>
             )}
-          </div>
+            {preview.goal === "orfs" && <OrfList orfs={preview.data.orfs} />}
+            {preview.goal === "primer" && <PrimerReportView report={preview.data} />}
 
-          {(preview.goal === "mutations" || preview.goal === "compare") && (
-            <>
-              <AlignmentViewer
-                alignedReference={preview.data.aligned_reference}
-                alignedQuery={preview.data.aligned_query}
-              />
-              <VariantTable variants={preview.data.variants} />
-            </>
-          )}
-          {preview.goal === "orfs" && <OrfList orfs={preview.data.orfs} />}
-          {preview.goal === "primer" && <PrimerReportView report={preview.data} />}
+            <hr className="divider" />
 
-          <hr className="divider" />
-
-          <div className="row">
             {user ? (
-              <button className="btn" onClick={handleSave} disabled={saveLoading || !!aiExplanation}>
-                {saveLoading ? "Saving & asking AI…" : aiExplanation ? "Saved" : "Save & get AI explanation"}
-              </button>
+              aiExplanation ? (
+                <span className="text-muted" style={{ fontSize: 14 }}>Saved to your history.</span>
+              ) : (
+                <div className="row" style={{ alignItems: "flex-end", flexWrap: "wrap" }}>
+                  <div style={{ flex: "1 1 260px" }}>
+                    <label className="label">Name this analysis</label>
+                    <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
+                  </div>
+                  <button className="btn" onClick={handleSave} disabled={saveLoading}>
+                    {saveLoading ? "Saving & asking AI…" : "Save & get AI explanation"}
+                  </button>
+                </div>
+              )
             ) : (
               <p className="text-muted" style={{ margin: 0, fontSize: 14 }}>
                 <Link to="/login">Log in</Link> to save this analysis and get an AI explanation.
               </p>
             )}
-          </div>
 
-          {aiExplanation && <AiExplanationPanel text={aiExplanation} />}
+            {aiExplanation && <AiExplanationPanel text={aiExplanation} />}
+          </div>
         </div>
       )}
     </div>

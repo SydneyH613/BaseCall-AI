@@ -5,7 +5,6 @@ from pydantic import BaseModel, ConfigDict
 
 
 class AnalysisGoal(str, Enum):
-    compare = "compare"
     mutations = "mutations"
     orfs = "orfs"
     primer = "primer"

@@ -1,4 +1,4 @@
-export type AnalysisGoal = "compare" | "mutations" | "orfs" | "primer";
+export type AnalysisGoal = "mutations" | "orfs" | "primer";
 
 export interface Variant {
   position: number;
