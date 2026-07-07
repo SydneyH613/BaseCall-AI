@@ -6,9 +6,10 @@ user types or uploads, before they commit to saving a full analysis.
 """
 
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.services.fasta_utils import (
+    MAX_SEQUENCE_LENGTH,
     call_variants,
     find_orfs,
     parse_single_sequence,
@@ -20,17 +21,17 @@ router = APIRouter(prefix="/api/sequences", tags=["sequences"])
 
 
 class SequenceIn(BaseModel):
-    sequence: str
+    sequence: str = Field(max_length=MAX_SEQUENCE_LENGTH)
 
 
 class OrfQueryIn(BaseModel):
-    sequence: str
+    sequence: str = Field(max_length=MAX_SEQUENCE_LENGTH)
     min_length: int = 30
 
 
 class CompareIn(BaseModel):
-    reference: str
-    query: str
+    reference: str = Field(max_length=MAX_SEQUENCE_LENGTH)
+    query: str = Field(max_length=MAX_SEQUENCE_LENGTH)
 
 
 @router.post("/stats")

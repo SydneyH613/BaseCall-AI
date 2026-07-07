@@ -35,6 +35,19 @@ def test_parse_fasta_empty_input():
     assert parse_fasta("   ") == []
 
 
+def test_parse_fasta_empty_header_does_not_drop_sequence():
+    # Regression test: a record with a blank ">" header line used to be
+    # silently discarded because the code checked header truthiness instead
+    # of whether a header had actually been seen.
+    records = parse_fasta(">\nACGTACGTACGT\n>seq2\nTTTT\n")
+    assert records == [("", "ACGTACGTACGT"), ("seq2", "TTTT")]
+
+
+def test_parse_fasta_bare_header_with_no_second_record():
+    records = parse_fasta(">\nACGTACGT\n")
+    assert records == [("", "ACGTACGT")]
+
+
 def test_parse_single_sequence_no_header_returns_none_label():
     label, seq = parse_single_sequence(HBB_OPENING)
     assert label is None
@@ -150,12 +163,44 @@ def test_find_orfs_finds_reverse_strand_orf():
     assert minus_strand_orfs[0]["protein"] == "MK*"
 
 
+def test_find_orfs_reverse_strand_coordinates_map_to_original_sequence():
+    # Regression test: minus-strand start/end used to be indices into the
+    # reverse-complemented string, not the user's original pasted sequence.
+    # Here the whole 9bp input is one big reverse-strand ORF, so start/end
+    # must span the full original sequence (0-9), not some other range.
+    fwd_orf = "ATGAAATAA"
+    seq = reverse_complement(fwd_orf)
+    orfs = find_orfs(seq, min_length=3)
+    minus_strand_orf = next(o for o in orfs if o["strand"] == "-")
+    assert minus_strand_orf["start"] == 0
+    assert minus_strand_orf["end"] == len(seq)
+    # The reported span, sliced out of the ORIGINAL sequence and
+    # reverse-complemented, must reproduce the ORF's forward-strand source.
+    original_span = seq[minus_strand_orf["start"]:minus_strand_orf["end"]]
+    assert reverse_complement(original_span) == fwd_orf
+
+
 # --- variant calling / mutation classification (core biological logic) -------
 
 def test_identical_sequences_produce_no_variants():
     result = call_variants(HBB_OPENING, HBB_OPENING)
     assert result["variants"] == []
     assert result["identity_pct"] == 100.0
+
+
+def test_call_variants_truncated_trailing_codon_not_leaked_as_ref_codon():
+    # Regression test: a substitution in an incomplete trailing codon (when
+    # reference length isn't a multiple of 3) used to leak a 1-2 character
+    # fragment as `ref_codon` even though it isn't a real codon, causing the
+    # frontend to render "<fragment> -> null".
+    reference = "ATGC"  # length 4: codon 0 = ATG, then a lone trailing "C"
+    query = "ATGA"
+    result = call_variants(reference, query)
+    assert len(result["variants"]) == 1
+    v = result["variants"][0]
+    assert v["ref_codon"] is None
+    assert v["alt_codon"] is None
+    assert v["mutation_type"] == "unknown"
 
 
 def test_call_variants_sickle_cell_missense():

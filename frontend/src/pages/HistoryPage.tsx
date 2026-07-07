@@ -12,6 +12,7 @@ const GOAL_LABELS: Record<string, string> = {
 export function HistoryPage() {
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     listAnalyses()
@@ -20,8 +21,13 @@ export function HistoryPage() {
   }, []);
 
   async function handleDelete(id: number) {
-    await deleteAnalysis(id);
-    setAnalyses((prev) => prev.filter((a) => a.id !== id));
+    setDeleteError(null);
+    try {
+      await deleteAnalysis(id);
+      setAnalyses((prev) => prev.filter((a) => a.id !== id));
+    } catch {
+      setDeleteError("Could not delete that analysis. Please try again.");
+    }
   }
 
   return (
@@ -31,6 +37,7 @@ export function HistoryPage() {
         <h1 style={{ fontSize: 28 }}>Saved analyses</h1>
       </div>
 
+      {deleteError && <p style={{ color: "var(--danger)", margin: 0, fontSize: 14 }}>{deleteError}</p>}
       {loading && <p className="text-muted">Loading…</p>}
       {!loading && analyses.length === 0 && (
         <p className="text-muted">

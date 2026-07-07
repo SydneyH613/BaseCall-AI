@@ -23,6 +23,9 @@ export function Navbar() {
         </Link>
 
         <nav className="row" style={{ gap: 24 }}>
+          <Link to="/learn" className="nav-link">
+            Learn
+          </Link>
           <Link to="/analyze" className="nav-link">
             Analyze
           </Link>

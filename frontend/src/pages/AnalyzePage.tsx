@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { SequenceTextArea } from "../components/SequenceInput/SequenceTextArea";
 import { StatsStrip } from "../components/Results/StatsStrip";
@@ -10,7 +10,13 @@ import { AiExplanationPanel } from "../components/Results/AiExplanationPanel";
 import { previewCompare, previewOrfs, previewPrimer, previewStats } from "../api/sequences";
 import { createAnalysis } from "../api/analyses";
 import { useAppSelector } from "../store/hooks";
-import type { AlignmentResult, AnalysisGoal, OrfPreviewResult, PrimerResult, SequenceStats } from "../types";
+import type {
+  AlignmentPreviewResult,
+  AnalysisGoal,
+  OrfPreviewResult,
+  PrimerPreviewResult,
+  SequenceStats,
+} from "../types";
 
 const DEFAULT_NAME = "Untitled analysis";
 
@@ -54,9 +60,9 @@ const GOALS: GoalDef[] = [
 ];
 
 type PreviewResult =
-  | { goal: "mutations"; data: AlignmentResult }
+  | { goal: "mutations"; data: AlignmentPreviewResult }
   | { goal: "orfs"; data: OrfPreviewResult }
-  | { goal: "primer"; data: PrimerResult };
+  | { goal: "primer"; data: PrimerPreviewResult };
 
 function detectedLabel(preview: PreviewResult): string | null {
   if (preview.goal === "mutations") {
@@ -71,6 +77,7 @@ function detectedLabel(preview: PreviewResult): string | null {
 export function AnalyzePage() {
   const [goal, setGoal] = useState<AnalysisGoal>("mutations");
   const [name, setName] = useState(DEFAULT_NAME);
+  const [nameEditedByUser, setNameEditedByUser] = useState(false);
   const [reference, setReference] = useState("");
   const [query, setQuery] = useState("");
   const [stats, setStats] = useState<SequenceStats | null>(null);
@@ -82,6 +89,11 @@ export function AnalyzePage() {
 
   const user = useAppSelector((state) => state.auth.user);
   const activeGoal = GOALS.find((g) => g.id === goal)!;
+
+  // Guards against a slow, stale request (e.g. from a goal the user has
+  // since switched away from) resolving after a newer one and overwriting
+  // its result.
+  const latestRequestId = useRef(0);
 
   useEffect(() => {
     if (!reference.trim()) {
@@ -106,6 +118,7 @@ export function AnalyzePage() {
       setError("This analysis needs a second (query) sequence to compare against.");
       return;
     }
+    const requestId = ++latestRequestId.current;
     setRunLoading(true);
     try {
       let result: PreviewResult;
@@ -116,19 +129,27 @@ export function AnalyzePage() {
       } else {
         result = { goal: "primer", data: await previewPrimer(reference) };
       }
+
+      // A newer request (from a tab switch + re-run while this one was in
+      // flight) has already started -- discard this stale response instead
+      // of clobbering the newer one.
+      if (requestId !== latestRequestId.current) return;
+
       setPreview(result);
 
       // If the user pasted a FASTA header, use it to fill in the analysis
-      // name automatically -- but only if they haven't already typed their
-      // own name, so we never clobber a custom label.
+      // name automatically -- but only if they haven't manually customized
+      // the name themselves, so a later run with a different sequence keeps
+      // the name in sync instead of going stale.
       const label = detectedLabel(result);
-      if (label && name === DEFAULT_NAME) {
+      if (label && !nameEditedByUser) {
         setName(label);
       }
     } catch {
+      if (requestId !== latestRequestId.current) return;
       setError("Analysis failed. Check that your sequence only contains valid bases (A, T, G, C, N).");
     } finally {
-      setRunLoading(false);
+      if (requestId === latestRequestId.current) setRunLoading(false);
     }
   }
 
@@ -259,7 +280,14 @@ export function AnalyzePage() {
                 <div className="row" style={{ alignItems: "flex-end", flexWrap: "wrap" }}>
                   <div style={{ flex: "1 1 260px" }}>
                     <label className="label">Name this analysis</label>
-                    <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
+                    <input
+                      className="input"
+                      value={name}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        setNameEditedByUser(true);
+                      }}
+                    />
                   </div>
                   <button className="btn" onClick={handleSave} disabled={saveLoading}>
                     {saveLoading ? "Saving & asking AI…" : "Save & get AI explanation"}

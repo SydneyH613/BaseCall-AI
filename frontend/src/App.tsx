@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Navbar } from "./components/Layout/Navbar";
 import { ProtectedRoute } from "./components/Layout/ProtectedRoute";
 import { HomePage } from "./pages/HomePage";
+import { LearnPage } from "./pages/LearnPage";
 import { AnalyzePage } from "./pages/AnalyzePage";
 import { HistoryPage } from "./pages/HistoryPage";
 import { AnalysisDetailPage } from "./pages/AnalysisDetailPage";
@@ -16,6 +17,7 @@ function App() {
         <main style={{ flex: 1 }}>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/learn" element={<LearnPage />} />
             <Route path="/analyze" element={<AnalyzePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />

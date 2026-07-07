@@ -9,6 +9,14 @@ from app.services.codon import classify_point_mutation, translate_codon, transla
 COMPLEMENT = {"A": "T", "T": "A", "G": "C", "C": "G", "N": "N"}
 VALID_BASES = set("ACGTN")
 
+# Needleman-Wunsch is O(n*m) in both time and memory over pure-Python
+# nested loops; without a cap, two large pasted sequences on an
+# unauthenticated preview endpoint could tie up a request for a very long
+# time. 5,000 bases comfortably covers genes/exons/primers for this tool's
+# educational use case while keeping the worst-case alignment (5000x5000)
+# tractable within a single request.
+MAX_SEQUENCE_LENGTH = 5_000
+
 
 def parse_fasta(raw: str) -> list[tuple[str, str]]:
     """Parse FASTA text into (header, sequence) records.
@@ -23,20 +31,20 @@ def parse_fasta(raw: str) -> list[tuple[str, str]]:
         return [("query", clean_sequence(raw))]
 
     records: list[tuple[str, str]] = []
-    header = ""
+    header: str | None = None
     chunks: list[str] = []
     for line in raw.splitlines():
         line = line.strip()
         if not line:
             continue
         if line.startswith(">"):
-            if header:
+            if header is not None:
                 records.append((header, "".join(chunks)))
             header = line[1:].strip()
             chunks = []
         else:
             chunks.append(line)
-    if header:
+    if header is not None:
         records.append((header, "".join(chunks)))
     return [(h, clean_sequence(s)) for h, s in records]
 
@@ -144,9 +152,17 @@ def find_orfs(seq: str, min_length: int = 30) -> list[dict]:
                         if stop_codon in _STOP_CODONS:
                             orf_len = j + 3 - i
                             if orf_len >= min_length:
+                                # For the minus strand, i/j are indices into the
+                                # reverse-complemented string. Map them back to
+                                # the user's original sequence so start/end are
+                                # always interpretable against what they pasted.
+                                if strand == "-":
+                                    orig_start, orig_end = len(s) - (j + 3), len(s) - i
+                                else:
+                                    orig_start, orig_end = i, j + 3
                                 orfs.append({
-                                    "start": i,
-                                    "end": j + 3,
+                                    "start": orig_start,
+                                    "end": orig_end,
                                     "frame": frame + 1,
                                     "strand": strand,
                                     "length": orf_len,
@@ -202,7 +218,7 @@ def call_variants(reference: str, query: str) -> dict:
                     "position": ref_pos,
                     "ref_base": r,
                     "alt_base": q,
-                    "ref_codon": ref_codon or None,
+                    "ref_codon": ref_codon if len(ref_codon) == 3 else None,
                     "alt_codon": alt_codon,
                     "ref_amino_acid": ref_aa,
                     "alt_amino_acid": alt_aa,

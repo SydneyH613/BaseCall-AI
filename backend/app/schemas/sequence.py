@@ -1,7 +1,9 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+from app.services.fasta_utils import MAX_SEQUENCE_LENGTH
 
 
 class AnalysisGoal(str, Enum):
@@ -13,8 +15,8 @@ class AnalysisGoal(str, Enum):
 class AnalysisCreateRequest(BaseModel):
     name: str
     goal: AnalysisGoal
-    reference_sequence: str
-    query_sequence: str | None = None
+    reference_sequence: str = Field(max_length=MAX_SEQUENCE_LENGTH)
+    query_sequence: str | None = Field(default=None, max_length=MAX_SEQUENCE_LENGTH)
 
 
 class Variant(BaseModel):
