@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { SequenceTrace } from "../components/SequenceTrace";
+import { BASE_LEGEND, baseColor } from "../utils/baseColor";
 
 const CAPABILITIES = [
   {
@@ -23,6 +25,11 @@ const CAPABILITIES = [
   },
 ];
 
+// The real HBB (beta-globin) fragment used throughout this project's own
+// test suite -- the sickle-cell mutation region -- rendered as an actual
+// base-colored trace rather than decorative noise.
+const HERO_SEQUENCE = "ATGGTGCACCTGACTCCTGAGGAGAAGTCTGCCGTTACT";
+
 export function HomePage() {
   return (
     <div className="page stack-lg">
@@ -41,7 +48,23 @@ export function HomePage() {
         </div>
       </section>
 
-      <hr className="divider" />
+      <div className="stack-xs">
+        <SequenceTrace sequence={HERO_SEQUENCE} />
+        <div className="row-between">
+          <span className="text-faint" style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>
+            HBB, exon 1 — the sickle-cell mutation region (39 real bases)
+          </span>
+          <div className="row-wrap" style={{ gap: 10 }}>
+            {BASE_LEGEND.map(({ base, name }) => (
+              <span key={base} className="text-faint" style={{ fontFamily: "var(--font-mono)", fontSize: 11 }} title={name}>
+                <span style={{ color: baseColor(base), fontWeight: 700 }}>{base}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="genomic-ruler" />
 
       <section className="stack-md">
         <span className="eyebrow">What it does</span>

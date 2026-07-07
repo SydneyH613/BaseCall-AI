@@ -1,4 +1,5 @@
 import type { Variant } from "../../types";
+import { ColoredBases } from "./ColoredBases";
 
 const MUTATION_LABELS: Record<string, string> = {
   silent: "Silent",
@@ -34,10 +35,18 @@ export function VariantTable({ variants }: { variants: Variant[] }) {
             <tr key={i}>
               <td style={{ fontFamily: "var(--font-mono)" }}>{v.position}</td>
               <td style={{ fontFamily: "var(--font-mono)" }}>
-                {v.ref_base} → {v.alt_base}
+                <ColoredBases text={v.ref_base} /> <span className="text-faint">→</span>{" "}
+                <ColoredBases text={v.alt_base} />
               </td>
               <td style={{ fontFamily: "var(--font-mono)" }}>
-                {v.ref_codon ? `${v.ref_codon} → ${v.alt_codon}` : "—"}
+                {v.ref_codon ? (
+                  <>
+                    <ColoredBases text={v.ref_codon} /> <span className="text-faint">→</span>{" "}
+                    <ColoredBases text={v.alt_codon ?? ""} />
+                  </>
+                ) : (
+                  "—"
+                )}
               </td>
               <td style={{ fontFamily: "var(--font-mono)" }}>
                 {v.ref_amino_acid ? `${v.ref_amino_acid} → ${v.alt_amino_acid}` : "—"}

@@ -28,6 +28,15 @@
   --success: #3d6b3a;
   --success-soft: #e6ede1;
 
+  /* Nucleotide colors, following the base-color convention used across
+     genome browsers and sequencing tools (IGV, UCSC, JBrowse) — muted to
+     sit inside this palette rather than the saturated defaults those
+     tools use on a black background. */
+  --base-a: #3d7a4f;
+  --base-t: #a13d2e;
+  --base-g: #7a5c1f;
+  --base-c: #3d6b8a;
+
   --font-display: "IBM Plex Serif", Georgia, "Times New Roman", serif;
   --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
@@ -62,6 +71,11 @@
   --success: #83b374;
   --success-soft: #202a1c;
 
+  --base-a: #74c286;
+  --base-t: #e2776a;
+  --base-g: #d4ac5a;
+  --base-c: #6aa8d4;
+
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-raised: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
@@ -88,6 +102,11 @@
     --warning-soft: #332912;
     --success: #83b374;
     --success-soft: #202a1c;
+
+    --base-a: #74c286;
+    --base-t: #e2776a;
+    --base-g: #d4ac5a;
+    --base-c: #6aa8d4;
 
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-raised: 0 4px 16px rgba(0, 0, 0, 0.35);
@@ -214,6 +233,21 @@ select {
   border: none;
   border-top: 1px solid var(--border);
   margin: 0;
+}
+
+/* A tick-mark strip evoking a genome browser's position ruler, used as a
+   section break in place of a plain horizontal rule. */
+.genomic-ruler {
+  height: 12px;
+  background-image:
+    repeating-linear-gradient(to right, var(--border-strong) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(to right, var(--border) 0 1px, transparent 1px 8px);
+  background-size:
+    100% 10px,
+    100% 5px;
+  background-repeat: repeat-x, repeat-x;
+  background-position: left top, left top;
+  border-bottom: 1px solid var(--border);
 }
 
 /* ---------- surfaces ---------- */

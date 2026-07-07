@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { BASE_LEGEND, baseColor } from "../../utils/baseColor";
 
 const MIN_CHUNK_SIZE = 20;
 const MAX_CHUNK_SIZE = 60;
@@ -52,73 +53,85 @@ export function AlignmentViewer({ alignedReference, alignedQuery }: Props) {
   const qryChunks = chunk(alignedQuery, chunkSize);
 
   return (
-    <div
-      ref={containerRef}
-      className="sequence-block scroll-x"
-      style={{
-        background: "var(--bg-sunken)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius)",
-        padding: "16px 18px",
-      }}
-    >
-      {refChunks.map((refLine, lineIdx) => {
-        const qryLine = qryChunks[lineIdx] ?? "";
-        const offset = lineIdx * chunkSize;
-        return (
-          <div key={lineIdx} style={{ marginBottom: 14 }}>
-            <div className="text-faint" style={{ fontSize: 10.5, marginBottom: 2 }}>
-              {offset}
-            </div>
-            <div>
-              <span className="text-faint" style={{ marginRight: 8 }}>
-                ref
-              </span>
-              {[...refLine].map((base, i) => (
-                <span
-                  key={i}
-                  style={{
-                    background: base === "-" ? "var(--bg-subtle)" : "transparent",
-                    color: base === "-" ? "var(--text-muted)" : undefined,
-                  }}
-                >
-                  {base}
+    <div className="stack-xs">
+      <div className="row-wrap" style={{ gap: 12 }}>
+        {BASE_LEGEND.map(({ base, name }) => (
+          <span
+            key={base}
+            className="text-faint"
+            style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}
+            title={name}
+          >
+            <span style={{ color: baseColor(base), fontWeight: 700 }}>{base}</span> {name}
+          </span>
+        ))}
+      </div>
+      <div
+        ref={containerRef}
+        className="sequence-block scroll-x"
+        style={{
+          background: "var(--bg-sunken)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius)",
+          padding: "16px 18px",
+        }}
+      >
+        {refChunks.map((refLine, lineIdx) => {
+          const qryLine = qryChunks[lineIdx] ?? "";
+          const offset = lineIdx * chunkSize;
+          return (
+            <div key={lineIdx} style={{ marginBottom: 14 }}>
+              <div className="text-faint" style={{ fontSize: 10.5, marginBottom: 2 }}>
+                {offset}
+              </div>
+              <div>
+                <span className="text-faint" style={{ marginRight: 8 }}>
+                  ref
                 </span>
-              ))}
-            </div>
-            <div>
-              <span className="text-faint" style={{ marginRight: 8 }}>
-                qry
-              </span>
-              {[...qryLine].map((base, i) => {
-                const refBase = refLine[i];
-                const isMismatch = refBase !== undefined && refBase !== base;
-                const isGap = base === "-" || refBase === "-";
-                return (
+                {[...refLine].map((base, i) => (
                   <span
                     key={i}
                     style={{
-                      background: isGap
-                        ? "var(--bg-subtle)"
-                        : isMismatch
-                          ? "var(--danger-soft)"
-                          : "transparent",
-                      color: isGap
-                        ? "var(--text-muted)"
-                        : isMismatch
-                          ? "var(--danger)"
-                          : undefined,
-                      fontWeight: isMismatch ? 700 : 400,
+                      background: base === "-" ? "var(--bg-subtle)" : "transparent",
+                      color: base === "-" ? "var(--text-muted)" : baseColor(base),
+                      fontWeight: 600,
                     }}
                   >
                     {base}
                   </span>
-                );
-              })}
+                ))}
+              </div>
+              <div>
+                <span className="text-faint" style={{ marginRight: 8 }}>
+                  qry
+                </span>
+                {[...qryLine].map((base, i) => {
+                  const refBase = refLine[i];
+                  const isMismatch = refBase !== undefined && refBase !== base;
+                  const isGap = base === "-" || refBase === "-";
+                  return (
+                    <span
+                      key={i}
+                      style={{
+                        background: isGap
+                          ? "var(--bg-subtle)"
+                          : isMismatch
+                            ? "var(--danger-soft)"
+                            : "transparent",
+                        color: isGap ? "var(--text-muted)" : baseColor(base),
+                        fontWeight: 600,
+                        boxShadow: isMismatch ? "inset 0 -2px 0 var(--danger)" : undefined,
+                      }}
+                    >
+                      {base}
+                    </span>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

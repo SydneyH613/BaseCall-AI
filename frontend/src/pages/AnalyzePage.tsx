@@ -275,7 +275,7 @@ export function AnalyzePage() {
             {preview.goal === "orfs" && <OrfList orfs={preview.data.orfs} />}
             {preview.goal === "primer" && <PrimerReportView report={preview.data} />}
 
-            <hr className="divider" />
+            <div className="genomic-ruler" />
 
             {user ? (
               aiExplanation ? (

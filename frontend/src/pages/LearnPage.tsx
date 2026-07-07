@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ColoredBases } from "../components/Results/ColoredBases";
 
 const SECTIONS = [
   { id: "dna-and-codons", label: "DNA & the genetic code" },
@@ -183,7 +184,7 @@ export function LearnPage() {
           <span className="eyebrow">Worked example — sickle-cell disease</span>
           <P>
             The <em>HBB</em> gene, on chromosome 11, encodes beta-globin — one of the two protein
-            chains that make up adult hemoglobin. A single point mutation, <strong>GAG → GTG</strong>,
+            chains that make up adult hemoglobin. A single point mutation, <strong><ColoredBases text="GAG" /> → <ColoredBases text="GTG" /></strong>,
             changes the codon for glutamic acid to the codon for valine at position 6 of the
             mature protein. One base, out of a 146-amino-acid chain. But glutamic acid is charged and
             valine is hydrophobic, and that one substitution is enough to let hemoglobin molecules
