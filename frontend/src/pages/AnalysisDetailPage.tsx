@@ -22,7 +22,7 @@ export function AnalysisDetailPage() {
 
   if (notFound) {
     return (
-      <div className="container" style={{ padding: "40px 24px" }}>
+      <div className="page">
         <p>
           Analysis not found. <Link to="/history">Back to history</Link>
         </p>
@@ -32,31 +32,34 @@ export function AnalysisDetailPage() {
 
   if (!analysis) {
     return (
-      <div className="container" style={{ padding: "40px 24px" }}>
-        <p className="text-muted">Loading...</p>
+      <div className="page">
+        <p className="text-muted">Loading…</p>
       </div>
     );
   }
 
   return (
-    <div className="container" style={{ padding: "40px 24px 80px", display: "flex", flexDirection: "column", gap: 20 }}>
-      <div>
-        <Link to="/history" className="text-muted" style={{ fontSize: 14, textDecoration: "none" }}>
+    <div className="page stack-md">
+      <div className="stack-xs">
+        <Link to="/history" className="text-muted" style={{ fontSize: 13 }}>
           ← Back to history
         </Link>
-        <h1 style={{ fontSize: 26, margin: "8px 0 0" }}>{analysis.name}</h1>
-        <p className="text-muted" style={{ margin: "4px 0 0" }}>
+        <h1 style={{ fontSize: 26 }}>{analysis.name}</h1>
+        {analysis.reference_label && analysis.reference_label !== analysis.name && (
+          <p className="text-muted" style={{ margin: 0, fontSize: 14 }}>{analysis.reference_label}</p>
+        )}
+        <p className="text-faint" style={{ margin: 0, fontFamily: "var(--font-mono)", fontSize: 12.5 }}>
           {new Date(analysis.created_at).toLocaleString()}
         </p>
       </div>
 
-      <div className="card" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
+      <div className="card card-pad stack-md">
         {(analysis.goal === "mutations" || analysis.goal === "compare") && (
           <>
-            <p className="text-muted" style={{ margin: 0 }}>
-              {(analysis.results as AlignmentResult).identity_pct}% identity · alignment score{" "}
+            <span className="text-faint" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
+              {(analysis.results as AlignmentResult).identity_pct}% identity · score{" "}
               {(analysis.results as AlignmentResult).score}
-            </p>
+            </span>
             <AlignmentViewer
               alignedReference={(analysis.results as AlignmentResult).aligned_reference}
               alignedQuery={(analysis.results as AlignmentResult).aligned_query}

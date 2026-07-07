@@ -2,7 +2,7 @@ import type { SequenceStats } from "../../types";
 
 export function StatsStrip({ stats }: { stats: SequenceStats }) {
   return (
-    <div style={{ display: "flex", gap: 16, fontSize: 12 }} className="text-muted">
+    <div className="row-wrap text-faint" style={{ fontFamily: "var(--font-mono)", fontSize: 11.5, gap: 16 }}>
       <span>{stats.length} bp</span>
       <span>GC {stats.gc_content_pct}%</span>
       <span>A {stats.a_count}</span>

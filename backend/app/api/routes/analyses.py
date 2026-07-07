@@ -7,20 +7,20 @@ from app.models.analysis import Analysis
 from app.models.user import User
 from app.schemas.sequence import AnalysisCreateRequest, AnalysisGoal, AnalysisOut
 from app.services.ai_interpret import explain_results
-from app.services.fasta_utils import call_variants, find_orfs, primer_report
+from app.services.fasta_utils import call_variants, find_orfs, parse_single_sequence, primer_report
 
 router = APIRouter(prefix="/api/analyses", tags=["analyses"])
 
 
-def _compute(payload: AnalysisCreateRequest) -> dict:
-    if payload.goal in (AnalysisGoal.compare, AnalysisGoal.mutations):
-        if not payload.query_sequence:
+def _compute(goal: AnalysisGoal, reference: str, query: str | None) -> dict:
+    if goal in (AnalysisGoal.compare, AnalysisGoal.mutations):
+        if not query:
             raise HTTPException(400, detail="query_sequence is required for this goal")
-        return call_variants(payload.reference_sequence, payload.query_sequence)
-    if payload.goal == AnalysisGoal.orfs:
-        return {"orfs": find_orfs(payload.reference_sequence)}
-    if payload.goal == AnalysisGoal.primer:
-        return primer_report(payload.reference_sequence)
+        return call_variants(reference, query)
+    if goal == AnalysisGoal.orfs:
+        return {"orfs": find_orfs(reference)}
+    if goal == AnalysisGoal.primer:
+        return primer_report(reference)
     raise HTTPException(400, detail="Unsupported analysis goal")
 
 
@@ -30,15 +30,22 @@ def create_analysis(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> Analysis:
-    results = _compute(payload)
-    ai_explanation = explain_results(payload.goal.value, results)
+    reference_label, reference = parse_single_sequence(payload.reference_sequence)
+    query_label, query = (
+        parse_single_sequence(payload.query_sequence) if payload.query_sequence else (None, None)
+    )
+
+    results = _compute(payload.goal, reference, query)
+    ai_explanation = explain_results(payload.goal.value, results, sequence_label=reference_label)
 
     analysis = Analysis(
         owner_id=current_user.id,
         name=payload.name,
         goal=payload.goal.value,
-        reference_sequence=payload.reference_sequence,
-        query_sequence=payload.query_sequence,
+        reference_sequence=reference,
+        query_sequence=query,
+        reference_label=reference_label,
+        query_label=query_label,
         results=results,
         ai_explanation=ai_explanation,
     )

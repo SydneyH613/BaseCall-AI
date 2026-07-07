@@ -1,62 +1,61 @@
 import { Link } from "react-router-dom";
 
-const FEATURES = [
+const CAPABILITIES = [
   {
-    title: "Mutation & variant calling",
-    body:
-      "Needleman-Wunsch global alignment implemented from scratch, mapped back to reference-frame codons to classify silent, missense, nonsense, and frameshift mutations.",
+    term: "Mutation & variant calling",
+    detail:
+      "Needleman-Wunsch global alignment, implemented from scratch, mapped back to reference-frame codons to classify substitutions as silent, missense, nonsense, or stop-loss — and gap runs as frameshift or in-frame insertions/deletions.",
   },
   {
-    title: "ORF finder",
-    body: "Scans all 6 reading frames for start-to-stop open reading frames and translates them to protein.",
+    term: "ORF finder",
+    detail:
+      "Scans all six reading frames — three forward, three on the reverse complement — for start-to-stop open reading frames, translating each to protein.",
   },
   {
-    title: "Primer design check",
-    body: "GC content, Wallace-rule melting temperature, and design warnings for PCR primers.",
+    term: "Primer design check",
+    detail:
+      "GC content, Wallace-rule melting temperature, and the design warnings a bench scientist would check before ordering a primer.",
   },
   {
-    title: "AI interpretation",
-    body:
-      "Computed, deterministic results are handed to Claude to generate a plain-language explanation of biological significance — the AI explains, it never computes.",
+    term: "AI interpretation",
+    detail:
+      "The already-computed results are handed to Claude as structured data — never the raw sequence, never the computation itself — to produce a plain-language read of biological significance.",
   },
 ];
 
 export function HomePage() {
   return (
-    <div className="container" style={{ padding: "64px 24px" }}>
-      <div style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
-        <h1 style={{ fontSize: 40, lineHeight: 1.15, margin: "0 0 16px" }}>
-          From raw sequence to real understanding.
-        </h1>
-        <p className="text-muted" style={{ fontSize: 17, margin: "0 0 32px" }}>
-          BaseCall AI runs real bioinformatics algorithms — sequence alignment, codon
-          translation, mutation classification — then uses AI to explain what the results
-          mean, in plain language.
+    <div className="page stack-lg">
+      <section className="stack-md" style={{ maxWidth: 620 }}>
+        <span className="eyebrow">Sequence analysis · powered by real algorithms</span>
+        <h1 style={{ fontSize: 40, lineHeight: 1.2 }}>From raw sequence to real understanding.</h1>
+        <p className="text-muted" style={{ fontSize: 16, lineHeight: 1.6, margin: 0 }}>
+          BaseCall AI runs the actual bioinformatics — sequence alignment, codon translation,
+          mutation classification — as deterministic computation. AI is used for exactly one
+          thing afterward: explaining what the results mean.
         </p>
-        <Link to="/analyze" className="btn" style={{ fontSize: 16, padding: "12px 28px" }}>
-          Start an analysis
-        </Link>
-      </div>
+        <div>
+          <Link to="/analyze" className="btn">
+            Start an analysis →
+          </Link>
+        </div>
+      </section>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: 16,
-          marginTop: 64,
-        }}
-      >
-        {FEATURES.map((f) => (
-          <div key={f.title} className="card" style={{ padding: 20 }}>
-            <h3 style={{ margin: "0 0 8px", fontSize: 16 }}>{f.title}</h3>
-            <p className="text-muted" style={{ margin: 0, fontSize: 14, lineHeight: 1.5 }}>
-              {f.body}
-            </p>
-          </div>
-        ))}
-      </div>
+      <hr className="divider" />
 
-      <p className="text-muted" style={{ fontSize: 12, marginTop: 48, textAlign: "center" }}>
+      <section className="stack-md">
+        <span className="eyebrow">What it does</span>
+        <dl className="stack-md" style={{ margin: 0 }}>
+          {CAPABILITIES.map((c) => (
+            <div key={c.term} className="definition-row">
+              <dt>{c.term}</dt>
+              <dd className="text-muted">{c.detail}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <p className="text-faint" style={{ fontSize: 12.5 }}>
         Educational tool only — not a diagnostic device. Do not use for clinical decision-making.
       </p>
     </div>

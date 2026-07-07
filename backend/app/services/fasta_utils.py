@@ -45,6 +45,29 @@ def clean_sequence(seq: str) -> str:
     return re.sub(r"[^ACGTNacgtn]", "", seq).upper()
 
 
+def parse_single_sequence(raw: str) -> tuple[str | None, str]:
+    """Parse one textarea's worth of input -- either a bare sequence or a
+    single-record FASTA -- into (header_or_None, cleaned_sequence).
+
+    This is the single entry point every analysis endpoint must go through.
+    Passing raw textarea input straight to sequence_stats/call_variants/etc
+    without this step lets a FASTA header's text get miscounted as sequence
+    data (e.g. the "C" and "A" in "HBB exon" would silently corrupt GC%,
+    length, and alignment).
+    """
+    raw = raw.strip()
+    if not raw:
+        return None, ""
+    if not raw.startswith(">"):
+        return None, clean_sequence(raw)
+
+    records = parse_fasta(raw)
+    if not records:
+        return None, ""
+    header, seq = records[0]
+    return header, seq
+
+
 def reverse_complement(seq: str) -> str:
     return "".join(COMPLEMENT.get(b, "N") for b in reversed(seq.upper()))
 

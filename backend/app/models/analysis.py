@@ -17,6 +17,11 @@ class Analysis(Base):
 
     reference_sequence: Mapped[str] = mapped_column(Text, nullable=False)
     query_sequence: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Gene/sequence label auto-detected from a FASTA header (e.g. ">HBB exon 1"),
+    # if the user's input included one. Distinct from `name`, which is the
+    # user's own free-text label for the saved analysis.
+    reference_label: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    query_label: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     results: Mapped[dict] = mapped_column(JSON, nullable=False)
     ai_explanation: Mapped[str | None] = mapped_column(Text, nullable=True)

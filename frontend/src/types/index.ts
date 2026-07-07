@@ -13,6 +13,8 @@ export interface Variant {
 }
 
 export interface AlignmentResult {
+  reference_label: string | null;
+  query_label: string | null;
   aligned_reference: string;
   aligned_query: string;
   score: number;
@@ -29,7 +31,13 @@ export interface OrfResult {
   protein: string;
 }
 
+export interface OrfPreviewResult {
+  label: string | null;
+  orfs: OrfResult[];
+}
+
 export interface SequenceStats {
+  label: string | null;
   length: number;
   gc_content_pct: number;
   a_count: number;
@@ -39,6 +47,7 @@ export interface SequenceStats {
 }
 
 export interface PrimerResult {
+  label: string | null;
   sequence: string;
   length: number;
   gc_content_pct: number;
@@ -52,6 +61,8 @@ export interface Analysis {
   goal: AnalysisGoal;
   reference_sequence: string;
   query_sequence: string | null;
+  reference_label: string | null;
+  query_label: string | null;
   results: AlignmentResult | { orfs: OrfResult[] } | PrimerResult;
   ai_explanation: string | null;
   created_at: string;

@@ -2,23 +2,28 @@ import type { OrfResult } from "../../types";
 
 export function OrfList({ orfs }: { orfs: OrfResult[] }) {
   if (orfs.length === 0) {
-    return <p className="text-muted">No open reading frames found above the minimum length.</p>;
+    return <p className="text-muted" style={{ margin: 0 }}>No open reading frames found above the minimum length.</p>;
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div className="stack-sm">
       {orfs.map((orf, i) => (
         <div
           key={i}
-          className="card"
-          style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 6 }}
+          className="stack-xs"
+          style={{
+            padding: "12px 16px",
+            background: "var(--bg-sunken)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius)",
+          }}
         >
-          <div style={{ display: "flex", gap: 12, fontSize: 13 }} className="text-muted">
+          <div className="row text-faint" style={{ fontFamily: "var(--font-mono)", fontSize: 11.5 }}>
             <span>
               {orf.start}–{orf.end} ({orf.length} bp)
             </span>
             <span>
-              Strand {orf.strand}, frame {orf.frame}
+              strand {orf.strand} · frame {orf.frame}
             </span>
           </div>
           <div className="sequence-block" style={{ wordBreak: "break-all" }}>

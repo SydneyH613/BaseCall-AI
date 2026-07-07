@@ -13,65 +13,27 @@ export function Navbar() {
   }
 
   return (
-    <header
-      style={{
-        borderBottom: "1px solid var(--border)",
-        background: "var(--bg-elevated)",
-      }}
-    >
-      <div
-        className="container"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          height: 64,
-        }}
-      >
-        <Link
-          to="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            textDecoration: "none",
-            fontWeight: 700,
-            fontSize: 18,
-          }}
-        >
-          <span
-            aria-hidden
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              background: "var(--accent)",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#04231f",
-              fontFamily: "var(--font-mono)",
-              fontSize: 13,
-              fontWeight: 800,
-            }}
-          >
+    <header style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)" }}>
+      <div className="container row-between" style={{ height: 62 }}>
+        <Link to="/" className="brand">
+          <span className="brand-mark" aria-hidden>
             BC
           </span>
           BaseCall AI
         </Link>
 
-        <nav style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <Link to="/analyze" style={{ textDecoration: "none", fontWeight: 500 }}>
+        <nav className="row" style={{ gap: 24 }}>
+          <Link to="/analyze" className="nav-link">
             Analyze
           </Link>
           {user && (
-            <Link to="/history" style={{ textDecoration: "none", fontWeight: 500 }}>
+            <Link to="/history" className="nav-link">
               History
             </Link>
           )}
           {user ? (
             <>
-              <span className="text-muted" style={{ fontSize: 14 }}>
+              <span className="text-faint" style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>
                 {user.email}
               </span>
               <button className="btn btn-secondary" onClick={handleLogout}>
@@ -80,7 +42,7 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login" style={{ textDecoration: "none", fontWeight: 500 }}>
+              <Link to="/login" className="nav-link">
                 Log in
               </Link>
               <Link to="/register" className="btn">

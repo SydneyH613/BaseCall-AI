@@ -1,13 +1,13 @@
 import { apiClient } from "./client";
-import type { AlignmentResult, OrfResult, PrimerResult, SequenceStats } from "../types";
+import type { AlignmentResult, OrfPreviewResult, PrimerResult, SequenceStats } from "../types";
 
 export async function previewStats(sequence: string): Promise<SequenceStats> {
   const { data } = await apiClient.post<SequenceStats>("/api/sequences/stats", { sequence });
   return data;
 }
 
-export async function previewOrfs(sequence: string, minLength = 30): Promise<OrfResult[]> {
-  const { data } = await apiClient.post<OrfResult[]>("/api/sequences/orfs", {
+export async function previewOrfs(sequence: string, minLength = 30): Promise<OrfPreviewResult> {
+  const { data } = await apiClient.post<OrfPreviewResult>("/api/sequences/orfs", {
     sequence,
     min_length: minLength,
   });

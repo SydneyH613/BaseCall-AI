@@ -10,7 +10,9 @@ import { AiExplanationPanel } from "../components/Results/AiExplanationPanel";
 import { previewCompare, previewOrfs, previewPrimer, previewStats } from "../api/sequences";
 import { createAnalysis } from "../api/analyses";
 import { useAppSelector } from "../store/hooks";
-import type { AlignmentResult, AnalysisGoal, OrfResult, PrimerResult, SequenceStats } from "../types";
+import type { AlignmentResult, AnalysisGoal, OrfPreviewResult, PrimerResult, SequenceStats } from "../types";
+
+const DEFAULT_NAME = "Untitled analysis";
 
 const GOALS: { id: AnalysisGoal; label: string; needsQuery: boolean }[] = [
   { id: "mutations", label: "Find mutations", needsQuery: true },
@@ -20,13 +22,24 @@ const GOALS: { id: AnalysisGoal; label: string; needsQuery: boolean }[] = [
 ];
 
 type PreviewResult =
-  | { goal: "mutations" | "compare"; data: AlignmentResult }
-  | { goal: "orfs"; data: OrfResult[] }
+  | { goal: "mutations"; data: AlignmentResult }
+  | { goal: "compare"; data: AlignmentResult }
+  | { goal: "orfs"; data: OrfPreviewResult }
   | { goal: "primer"; data: PrimerResult };
+
+function detectedLabel(preview: PreviewResult): string | null {
+  if (preview.goal === "mutations" || preview.goal === "compare") {
+    const parts = [preview.data.reference_label, preview.data.query_label].filter(
+      (label): label is string => Boolean(label),
+    );
+    return parts.length > 0 ? parts.join(" / ") : null;
+  }
+  return preview.data.label;
+}
 
 export function AnalyzePage() {
   const [goal, setGoal] = useState<AnalysisGoal>("mutations");
-  const [name, setName] = useState("Untitled analysis");
+  const [name, setName] = useState(DEFAULT_NAME);
   const [reference, setReference] = useState("");
   const [query, setQuery] = useState("");
   const [stats, setStats] = useState<SequenceStats | null>(null);
@@ -64,15 +77,22 @@ export function AnalyzePage() {
     }
     setRunLoading(true);
     try {
+      let result: PreviewResult;
       if (goal === "mutations" || goal === "compare") {
-        const data = await previewCompare(reference, query);
-        setPreview({ goal, data });
+        result = { goal, data: await previewCompare(reference, query) };
       } else if (goal === "orfs") {
-        const data = await previewOrfs(reference);
-        setPreview({ goal: "orfs", data });
+        result = { goal: "orfs", data: await previewOrfs(reference) };
       } else {
-        const data = await previewPrimer(reference);
-        setPreview({ goal: "primer", data });
+        result = { goal: "primer", data: await previewPrimer(reference) };
+      }
+      setPreview(result);
+
+      // If the user pasted a FASTA header, use it to fill in the analysis
+      // name automatically -- but only if they haven't already typed their
+      // own name, so we never clobber a custom label.
+      const label = detectedLabel(result);
+      if (label && name === DEFAULT_NAME) {
+        setName(label);
       }
     } catch {
       setError("Analysis failed. Check that your sequence only contains valid bases (A, T, G, C, N).");
@@ -100,16 +120,19 @@ export function AnalyzePage() {
     }
   }
 
+  const label = preview ? detectedLabel(preview) : null;
+
   return (
-    <div className="container" style={{ padding: "40px 24px 80px", display: "flex", flexDirection: "column", gap: 24 }}>
-      <div>
-        <h1 style={{ fontSize: 28, margin: "0 0 4px" }}>Analyze a sequence</h1>
+    <div className="page stack-lg">
+      <div className="stack-xs">
+        <span className="eyebrow">Analysis</span>
+        <h1 style={{ fontSize: 28 }}>Analyze a sequence</h1>
         <p className="text-muted" style={{ margin: 0 }}>
           Real algorithms compute the results; AI explains what they mean.
         </p>
       </div>
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <div className="tabs">
         {GOALS.map((g) => (
           <button
             key={g.id}
@@ -119,16 +142,16 @@ export function AnalyzePage() {
               setAiExplanation(null);
               setError(null);
             }}
-            className={goal === g.id ? "btn" : "btn btn-secondary"}
+            className={goal === g.id ? "tab active" : "tab"}
           >
             {g.label}
           </button>
         ))}
       </div>
 
-      <div className="card" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="card card-pad stack-md">
         <div>
-          <label className="label">Analysis name (used when saving)</label>
+          <label className="label">Analysis name</label>
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
 
@@ -136,6 +159,7 @@ export function AnalyzePage() {
           label={activeGoal.needsQuery ? "Reference sequence" : "Sequence"}
           value={reference}
           onChange={setReference}
+          placeholder="Paste a raw sequence, or a FASTA record with a >header (e.g. '>HBB exon 1') to auto-label this analysis by gene"
         />
         {stats && <StatsStrip stats={stats} />}
 
@@ -143,24 +167,40 @@ export function AnalyzePage() {
           <SequenceTextArea label="Query sequence" value={query} onChange={setQuery} />
         )}
 
-        {error && <p style={{ color: "var(--danger)", margin: 0 }}>{error}</p>}
+        {error && (
+          <p style={{ color: "var(--danger)", margin: 0, fontSize: 14 }}>{error}</p>
+        )}
 
         <div>
           <button className="btn" onClick={handleRun} disabled={runLoading}>
-            {runLoading ? "Running..." : "Run analysis"}
+            {runLoading ? "Running…" : "Run analysis"}
           </button>
         </div>
       </div>
 
       {preview && (
-        <div className="card" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
-          <h2 style={{ fontSize: 18, margin: 0 }}>Results</h2>
+        <div className="card card-pad stack-md">
+          <div className="row-between">
+            <div className="stack-xs" style={{ gap: 2 }}>
+              <span className="eyebrow">Results</span>
+              {label && (
+                <span style={{ fontFamily: "var(--font-display)", fontSize: 15 }}>{label}</span>
+              )}
+              {!label && (
+                <span className="text-faint" style={{ fontSize: 12.5 }}>
+                  No gene detected — paste a FASTA {"'>"}header to label this analysis automatically.
+                </span>
+              )}
+            </div>
+            {(preview.goal === "mutations" || preview.goal === "compare") && (
+              <span className="text-faint" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
+                {preview.data.identity_pct}% identity · score {preview.data.score}
+              </span>
+            )}
+          </div>
 
           {(preview.goal === "mutations" || preview.goal === "compare") && (
             <>
-              <p className="text-muted" style={{ margin: 0 }}>
-                {preview.data.identity_pct}% identity · alignment score {preview.data.score}
-              </p>
               <AlignmentViewer
                 alignedReference={preview.data.aligned_reference}
                 alignedQuery={preview.data.aligned_query}
@@ -168,16 +208,18 @@ export function AnalyzePage() {
               <VariantTable variants={preview.data.variants} />
             </>
           )}
-          {preview.goal === "orfs" && <OrfList orfs={preview.data} />}
+          {preview.goal === "orfs" && <OrfList orfs={preview.data.orfs} />}
           {preview.goal === "primer" && <PrimerReportView report={preview.data} />}
 
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <hr className="divider" />
+
+          <div className="row">
             {user ? (
               <button className="btn" onClick={handleSave} disabled={saveLoading || !!aiExplanation}>
-                {saveLoading ? "Saving & asking AI..." : aiExplanation ? "Saved" : "Save & get AI explanation"}
+                {saveLoading ? "Saving & asking AI…" : aiExplanation ? "Saved" : "Save & get AI explanation"}
               </button>
             ) : (
-              <p className="text-muted" style={{ margin: 0 }}>
+              <p className="text-muted" style={{ margin: 0, fontSize: 14 }}>
                 <Link to="/login">Log in</Link> to save this analysis and get an AI explanation.
               </p>
             )}

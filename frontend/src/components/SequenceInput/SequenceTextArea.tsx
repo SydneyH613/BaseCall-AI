@@ -38,27 +38,16 @@ export function SequenceTextArea({ label, value, onChange, placeholder, rows = 6
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
       style={{
-        borderRadius: 10,
+        borderRadius: "var(--radius)",
         outline: isDragging ? "2px dashed var(--accent)" : "none",
         outlineOffset: 4,
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <label className="label">{label}</label>
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--accent)",
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: "pointer",
-            padding: 0,
-            marginBottom: 6,
-          }}
-        >
+      <div className="row-between" style={{ marginBottom: 7 }}>
+        <label className="label" style={{ margin: 0 }}>
+          {label}
+        </label>
+        <button type="button" className="field-action" onClick={() => inputRef.current?.click()}>
           Upload .fasta / .txt
         </button>
         <input

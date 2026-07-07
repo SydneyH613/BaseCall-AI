@@ -30,9 +30,12 @@ export function LoginPage() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 400, padding: "64px 24px" }}>
-      <h1 style={{ fontSize: 26, marginBottom: 24 }}>Log in</h1>
-      <form onSubmit={handleSubmit} className="card" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+    <div className="page page-narrow stack-md">
+      <div className="stack-xs">
+        <span className="eyebrow">Account</span>
+        <h1 style={{ fontSize: 26 }}>Log in</h1>
+      </div>
+      <form onSubmit={handleSubmit} className="card card-pad stack-md">
         <div>
           <label className="label">Email</label>
           <input className="input" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -43,10 +46,10 @@ export function LoginPage() {
         </div>
         {error && <p style={{ color: "var(--danger)", fontSize: 14, margin: 0 }}>{error}</p>}
         <button className="btn" type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Log in"}
+          {loading ? "Logging in…" : "Log in"}
         </button>
       </form>
-      <p className="text-muted" style={{ marginTop: 16, fontSize: 14 }}>
+      <p className="text-muted" style={{ fontSize: 14, margin: 0 }}>
         No account? <Link to="/register">Sign up</Link>
       </p>
     </div>

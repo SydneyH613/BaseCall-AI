@@ -72,6 +72,8 @@ class AnalysisOut(BaseModel):
     goal: AnalysisGoal
     reference_sequence: str
     query_sequence: str | None
+    reference_label: str | None
+    query_label: str | None
     results: dict
     ai_explanation: str | None
     created_at: datetime

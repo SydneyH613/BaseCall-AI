@@ -18,17 +18,26 @@ export function AlignmentViewer({ alignedReference, alignedQuery }: Props) {
   const qryChunks = chunk(alignedQuery, CHUNK_SIZE);
 
   return (
-    <div className="sequence-block" style={{ overflowX: "auto" }}>
+    <div
+      className="sequence-block"
+      style={{
+        overflowX: "auto",
+        background: "var(--bg-sunken)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius)",
+        padding: "16px 18px",
+      }}
+    >
       {refChunks.map((refLine, lineIdx) => {
         const qryLine = qryChunks[lineIdx] ?? "";
         const offset = lineIdx * CHUNK_SIZE;
         return (
           <div key={lineIdx} style={{ marginBottom: 14 }}>
-            <div className="text-muted" style={{ fontSize: 11, marginBottom: 2 }}>
+            <div className="text-faint" style={{ fontSize: 10.5, marginBottom: 2 }}>
               {offset}
             </div>
             <div>
-              <span className="text-muted" style={{ marginRight: 8 }}>
+              <span className="text-faint" style={{ marginRight: 8 }}>
                 ref
               </span>
               {[...refLine].map((base, i) => (
@@ -44,7 +53,7 @@ export function AlignmentViewer({ alignedReference, alignedQuery }: Props) {
               ))}
             </div>
             <div>
-              <span className="text-muted" style={{ marginRight: 8 }}>
+              <span className="text-faint" style={{ marginRight: 8 }}>
                 qry
               </span>
               {[...qryLine].map((base, i) => {

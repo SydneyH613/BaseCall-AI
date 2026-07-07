@@ -26,34 +26,30 @@ export function HistoryPage() {
   }
 
   return (
-    <div className="container" style={{ padding: "40px 24px 80px" }}>
-      <h1 style={{ fontSize: 28, marginBottom: 24 }}>Saved analyses</h1>
+    <div className="page stack-md">
+      <div className="stack-xs">
+        <span className="eyebrow">Archive</span>
+        <h1 style={{ fontSize: 28 }}>Saved analyses</h1>
+      </div>
 
-      {loading && <p className="text-muted">Loading...</p>}
+      {loading && <p className="text-muted">Loading…</p>}
       {!loading && analyses.length === 0 && (
         <p className="text-muted">
           No saved analyses yet. <Link to="/analyze">Run one</Link> and save it to see it here.
         </p>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div className="stack-sm">
         {analyses.map((a) => (
-          <div
-            key={a.id}
-            className="card"
-            style={{
-              padding: 16,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 16,
-            }}
-          >
+          <div key={a.id} className="card row-between" style={{ padding: "14px 18px" }}>
             <div>
-              <Link to={`/history/${a.id}`} style={{ fontWeight: 600, textDecoration: "none" }}>
+              <Link to={`/history/${a.id}`} style={{ fontWeight: 500, fontFamily: "var(--font-display)", fontSize: 16 }}>
                 {a.name}
               </Link>
-              <div className="text-muted" style={{ fontSize: 13, marginTop: 4 }}>
+              {a.reference_label && a.reference_label !== a.name && (
+                <div className="text-muted" style={{ fontSize: 13 }}>{a.reference_label}</div>
+              )}
+              <div className="text-faint" style={{ fontSize: 12.5, marginTop: 3, fontFamily: "var(--font-mono)" }}>
                 {GOAL_LABELS[a.goal] ?? a.goal} · {new Date(a.created_at).toLocaleString()}
               </div>
             </div>

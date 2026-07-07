@@ -6,6 +6,7 @@ from app.services.fasta_utils import (
     find_orfs,
     melting_temp_wallace,
     parse_fasta,
+    parse_single_sequence,
     primer_report,
     reverse_complement,
     sequence_stats,
@@ -32,6 +33,34 @@ def test_parse_fasta_raw_sequence_without_header():
 
 def test_parse_fasta_empty_input():
     assert parse_fasta("   ") == []
+
+
+def test_parse_single_sequence_no_header_returns_none_label():
+    label, seq = parse_single_sequence(HBB_OPENING)
+    assert label is None
+    assert seq == HBB_OPENING
+
+
+def test_parse_single_sequence_extracts_fasta_header():
+    label, seq = parse_single_sequence(f">HBB exon 1, sickle-cell region\n{HBB_OPENING}")
+    assert label == "HBB exon 1, sickle-cell region"
+    assert seq == HBB_OPENING
+
+
+def test_parse_single_sequence_header_text_does_not_leak_into_sequence():
+    # Regression test: previously the raw textarea input (including the
+    # ">header" line) was passed directly to sequence_stats/call_variants,
+    # so letters like the "C" and "A" in "HBB exon" were silently counted
+    # as sequence data, corrupting length/GC%/alignment.
+    label, seq = parse_single_sequence(f">HBB exon 1, sickle-cell region\n{HBB_OPENING}")
+    assert len(seq) == len(HBB_OPENING)
+    stats = sequence_stats(seq)
+    assert stats == sequence_stats(HBB_OPENING)
+
+
+def test_parse_single_sequence_empty_input():
+    assert parse_single_sequence("") == (None, "")
+    assert parse_single_sequence("   ") == (None, "")
 
 
 def test_clean_sequence_strips_non_bases():

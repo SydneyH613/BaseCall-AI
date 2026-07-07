@@ -36,7 +36,7 @@ def _client() -> Anthropic:
     return Anthropic(api_key=settings.anthropic_api_key)
 
 
-def explain_results(goal: str, results: dict) -> str:
+def explain_results(goal: str, results: dict, sequence_label: str | None = None) -> str:
     if not settings.anthropic_api_key:
         return (
             "AI explanation is unavailable: no ANTHROPIC_API_KEY configured on the "
@@ -44,8 +44,10 @@ def explain_results(goal: str, results: dict) -> str:
             "backend .env to enable plain-language interpretation."
         )
 
+    label_line = f"Sequence label (from the user's FASTA header): {sequence_label}\n\n" if sequence_label else ""
     user_content = (
         f"Analysis goal: {goal}\n\n"
+        f"{label_line}"
         f"Computed results (JSON):\n{json.dumps(results, indent=2)}\n\n"
         "Explain what these results mean."
     )
