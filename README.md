@@ -88,6 +88,20 @@ npm run dev
 |---|---|
 | `VITE_API_BASE_URL` | Backend API base URL |
 
+## Testing
+
+The core biological logic (alignment, codon translation, mutation
+classification, ORF finding, primer checks) has an automated `pytest` suite,
+including a validation against the real, well-documented sickle-cell mutation
+in human HBB (beta-globin): GAG→GTG, Glu6Val.
+
+```bash
+cd backend
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+pytest tests/ -v
+```
+
 ## Deployment
 
 - **Frontend** → Vercel (or Netlify): point at `frontend/`, set `VITE_API_BASE_URL` to the deployed backend URL.
