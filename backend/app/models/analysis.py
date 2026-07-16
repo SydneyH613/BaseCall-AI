@@ -11,9 +11,9 @@ class Analysis(Base):
     __tablename__ = "analyses"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True, nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    goal: Mapped[str] = mapped_column(String(50), nullable=False)  # compare | mutations | orfs | primer
+    goal: Mapped[str] = mapped_column(String(50), nullable=False)  # mutations | orfs | primer
 
     reference_sequence: Mapped[str] = mapped_column(Text, nullable=False)
     query_sequence: Mapped[str | None] = mapped_column(Text, nullable=True)
